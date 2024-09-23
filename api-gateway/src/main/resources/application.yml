@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: api-gateway
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: INFO
+    org.springframework.cloud.gateway: TRACE
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+      initialInstanceInfoReplicationIntervalSeconds: 5
+      registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+spring.cloud.gateway.routes:
+  - id: user-service
+    uri: lb://USER-SERVICE
+    predicates:
+      - Path=/api/v1/users/**
+  - id: department-service
+    uri: lb://DEPARTMENT-SERVICE
+    predicates:
+      - Path=/api/v1/departments/**
+  - id: eureka-ui
+    uri: http://localhost:8761
+    predicates:
+      - Path=/eurekawebui
+  - id: eureka-css-js
+    uri: http://localhost:8761
+    predicates:
+      - Path=/eureka/**
