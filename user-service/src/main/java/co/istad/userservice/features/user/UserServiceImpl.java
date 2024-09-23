@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
 
 @Service
@@ -46,7 +45,7 @@ public class UserServiceImpl implements UserService {
         List<User> users = userRepository.findAll();
         List<UserResponse> userResponses = users
                 .stream()
-                .map(userMapper::userToUserResponse)
+                .map(userMapper::toUserResponse)
                 .toList();
 
         return new PageImpl<>(userResponses, pageable, userResponses.size());
@@ -59,7 +58,7 @@ public class UserServiceImpl implements UserService {
                 ()-> new ErrorResponseException(HttpStatus.NOT_FOUND)
         );
 
-        return userMapper.userToUserResponse(user);
+        return userMapper.toUserResponse(user);
     }
 
     @Override
