@@ -5,7 +5,6 @@ import co.istad.userservice.features.user.dto.UserCreateRequest;
 import co.istad.userservice.features.user.dto.UserResponse;
 import co.istad.userservice.features.user.dto.UserUpdateRequest;
 import co.istad.userservice.mapper.UserMapper;
-import com.sun.jdi.request.DuplicateRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -14,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponseException;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @Service
@@ -28,13 +29,13 @@ public class UserServiceImpl implements UserService {
         User user = new User();
 
         if(userRepository.existsByUsername(request.username()) && userRepository.existsByEmail(request.email())) {
-            throw new DuplicateRequestException("Username or Email already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
 
         user.setUsername(request.username());
         user.setEmail(request.email());
         user.setAddress(request.address());
-        user.setEmail(request.email());
+        user.setPhone(request.phone());
 
         userRepository.save(user);
     }
