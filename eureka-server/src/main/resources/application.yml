@@ -14,3 +14,9 @@ eureka:
     response-cache-update-interval-ms: 5000
   dashboard:
     path: /eurekawebui
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

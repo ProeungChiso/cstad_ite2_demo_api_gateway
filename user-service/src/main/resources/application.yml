@@ -5,6 +5,13 @@ spring:
     mongodb:
       uri: mongodb://admin:admin%4012345@localhost:27017
       database: user_db
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      uri: "http://localhost:8168"
+  profiles:
+    active: mongodb
 server:
   port: 8081
 
@@ -17,3 +24,4 @@ eureka:
   instance:
     leaseRenewalIntervalInSeconds: 5
     leaseExpirationDurationInSeconds: 5
+
