@@ -1,0 +1,147 @@
+services:
+
+  # config-server
+  config-server:
+    container_name: config-server
+    image: proeungchiso/config-server:latest
+    build:
+      context: ../../config-server
+    ports:
+      - "8168:8168"
+    environment:
+      - SPRING_CLOUD_VAULT_TOKEN=${VAULT_TOKEN}
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8168/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  #eureka-server
+  eureka-server:
+    container_name: eureka-server
+    image: proeungchiso/eureka-server:latest
+    build:
+      context: ../../eureka-server
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/eureka/apps" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - microservices-network
+
+  #mongodb-service
+  mongodb-service:
+    container_name: mongodb-service
+    image: mongodb/mongodb-community-server:latest
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    restart: always
+    healthcheck:
+      test: echo 'db.runCommand({find:"user_db.users"}).ok' | mongosh --authenticationDatabase admin --host localhost -u ${MONGO_INITDB_ROOT_USERNAME} -p ${MONGO_INITDB_ROOT_PASSWORD} admin --quiet | grep -q 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - user_mongodb_data_vol:/data/db/
+      - user_mongodb_log_vol:/var/log/mongodb/
+    networks:
+      - microservices-network
+
+  #postgresdb-service
+  postgresql-service:
+    container_name: postgresql-service
+    image: postgres:bullseye
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+
+  #user-service
+  user-service:
+    depends_on:
+      mongodb-service:
+        condition: service_healthy
+    container_name: user-service
+    image: proeungchiso/user-service:latest
+    build:
+      context: ../../user-service
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - microservices-network
+
+  #department-service
+  department-service:
+    depends_on:
+      postgresql-service:
+        condition: service_healthy
+    container_name: department-service
+    image: proeungchiso/department-service:latest
+    build:
+      context: ../../department-service
+    ports:
+      - "8082:8082"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8082/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - microservices-network
+
+  #api-gateway
+  api-gateway:
+    depends_on:
+      - user-service
+    container_name: api-gateway
+    image: proeungchiso/api-gateway:latest
+    build:
+      context: ../../api-gateway
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - microservices-network
+
+#network
+networks:
+  microservices-network:
+    driver: bridge
+
+#volumes
+volumes:
+  user_mongodb_data_vol:
+  user_mongodb_log_vol:
+  pg_data:
+

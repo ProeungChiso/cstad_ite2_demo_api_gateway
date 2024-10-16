@@ -1,13 +1,42 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: config-server
   profiles:
     active:
       - git
+      - vault
   cloud:
     config:
       server:
         git:
           uri: https://github.com/ProeungChiso/cstad_ite2_configuration.git
+          default-label: main
+        vault:
+          host: 128.199.199.32
+          port: 8200
+          scheme: http
+          authentication: token
+          token: myroot
+          kv-version: 2
+          backend: secret
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka/
+      initialInstanceInfoReplicationIntervalSeconds: 5
+      registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+
 server:
   port: 8168
