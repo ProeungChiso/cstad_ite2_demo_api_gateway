@@ -1,6 +1,8 @@
 spring:
   application:
     name: DEPARTMENT-SERVICE
+  profiles:
+    active: dev
   datasource:
     url: jdbc:postgresql://postgresql-service:5432/department_db
     password: 1234
@@ -19,7 +21,7 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: ${CONFIG_SERVER_URI}
       initialInstanceInfoReplicationIntervalSeconds: 5
       registryFetchIntervalSeconds: 5
   instance:

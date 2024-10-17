@@ -1,0 +1,2 @@
+### config server uri ###
+CONFIG_SERVER_URI: http://config-server:8168/

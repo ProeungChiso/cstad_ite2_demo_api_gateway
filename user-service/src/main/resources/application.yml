@@ -5,7 +5,8 @@ spring:
     import: "optional:configserver:"
   cloud:
     config:
-      uri: http://config-server:8168/
+      uri: ${CONFIG_SERVER_URI}
       name: USERS-SERVICE
+      profile: dev
   profiles:
-    active: mongodb
+    active: dev

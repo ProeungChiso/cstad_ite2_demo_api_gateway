@@ -1,0 +1,2 @@
+### config server uri ###
+CONFIG_SERVER_URI: http://localhost:8168/
